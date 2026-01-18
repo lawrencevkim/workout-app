@@ -345,7 +345,10 @@ const SettingsView = ({
   const [tempDate, setTempDate] = useState(startDate.toISOString().split('T')[0]);
 
   const handleSave = () => {
-    setStartDate(new Date(tempDate));
+    // Parse the local date string to avoid UTC shifting
+    const [year, month, day] = tempDate.split('-').map(Number);
+    // Create date at local midnight
+    setStartDate(new Date(year, month - 1, day));
     onClose();
   };
 
@@ -405,7 +408,9 @@ const ScheduleView = ({
     const today = new Date();
     // Generate 8 weeks dynamically
     const weeks = Array.from({ length: 8 }, (_, i) => i + 1);
-    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    
+    // Helper to generate day indices 0-6
+    const dayIndices = [0, 1, 2, 3, 4, 5, 6];
 
     const msPerDay = 1000 * 60 * 60 * 24;
     const dayDiff = Math.floor((today.getTime() - startDate.getTime()) / msPerDay);
@@ -474,12 +479,13 @@ const ScheduleView = ({
                              </div>
                          </div>
                          <div className="divide-y divide-slate-100">
-                             {days.map((dayName, idx) => {
+                             {dayIndices.map((idx) => {
                                  const dayDate = new Date(weekStart);
                                  dayDate.setDate(dayDate.getDate() + idx);
                                  const dateStr = dayDate.toISOString().split('T')[0];
                                  const { workout, week: phaseWeek } = getWorkoutForDate(startDate, dayDate);
                                  const isToday = dayDate.toDateString() === today.toDateString();
+                                 const dayName = dayDate.toLocaleDateString('en-US', { weekday: 'short' });
                                  
                                  // Calculate Daily Stats
                                  let dailyTotal = 0;
@@ -549,11 +555,8 @@ const App = () => {
       const stored = localStorage.getItem('tp_start_date');
       if (stored) return new Date(stored);
       
-      const d = new Date();
-      const day = d.getDay();
-      const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-      const monday = new Date(d.setDate(diff));
-      return monday;
+      // Default to Jan 19, 2026
+      return new Date(2026, 0, 19);
   });
 
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
