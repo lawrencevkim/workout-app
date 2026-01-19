@@ -296,7 +296,7 @@ export const P1_D2_Strength: DailyWorkoutPlan = {
           ],
           weeks: {
             1: { sets: '3', reps: '10-15+' },
-            2: { sets: '1', reps: '15-20', intensity: '2x10-15+' },
+            2: { sets: '3', reps: '15-20', intensity: '2x10-15+' },
             3: { sets: '3', reps: 'MAX' },
             4: { sets: '3', reps: 'MAX' }
           }
@@ -723,7 +723,7 @@ export const P2_D3_Strength: DailyWorkoutPlan = {
             'Box Jump: Stand before box, swing arms, jump soft onto box. Stand tall. Step down.',
             'Squat Jump: Squat and explode up. Land soft.'
           ],
-          weeks: createWeeks({ sets: '2', reps: '8' }, { sets: '3', reps: '8' }, { sets: '1', reps: '8' }, { sets: '1', reps: '8' }) 
+          weeks: createWeeks({ sets: '2', reps: '8' }, { sets: '3', reps: '8' }, { sets: '3', reps: '8' }, { sets: '2', reps: '8' }) 
         },
         { 
           name: 'Goblet Squat (Pause)', 
@@ -792,11 +792,11 @@ export const P2_D3_Strength: DailyWorkoutPlan = {
 };
 
 
-// --- Conditioning / Run Data (Placeholders for Structure) ---
+// --- Conditioning / Run Data ---
 
-export const P1_Conditioning_A: DailyWorkoutPlan = {
+export const Conditioning_A_P1: DailyWorkoutPlan = {
   id: 'p1_cond_a',
-  title: 'Conditioning A (Run)',
+  title: 'Phase 1: Conditioning A (Intervals)',
   type: 'Run',
   sections: [
     {
@@ -837,9 +837,9 @@ export const P1_Conditioning_A: DailyWorkoutPlan = {
   ]
 };
 
-export const P1_Conditioning_B: DailyWorkoutPlan = {
+export const Conditioning_B_P1: DailyWorkoutPlan = {
     id: 'p1_cond_b',
-    title: 'Conditioning B (Shuttle/Sprints)',
+    title: 'Phase 1: Conditioning B (Sprints)',
     type: 'Run',
     sections: [
         { type: 'Warm Up', title: 'Dynamic Warm Up', exercises: [] },
@@ -857,6 +857,76 @@ export const P1_Conditioning_B: DailyWorkoutPlan = {
                     'One rep = down and back (50m total) or as specified.',
                     '4 laps = 25m, back, 25m, back (100m total).'
                   ],
+                  weeks: createWeeks({sets: '6', reps: '4 laps'}, {sets: '8', reps: '4 laps'}, {sets: '10', reps: '4 laps'}, {sets: '10', reps: '4 laps'}) 
+                }
+            ]
+        }
+    ]
+};
+
+// Phase 2 Conditioning (Resets volume or maintains structure)
+export const Conditioning_A_P2: DailyWorkoutPlan = {
+  id: 'p2_cond_a',
+  title: 'Phase 2: Conditioning A (Intervals)',
+  type: 'Run',
+  sections: [
+    {
+      type: 'Warm Up',
+      title: 'Run Warm Up',
+      exercises: [
+        { 
+          name: 'Light Jog', 
+          notes: '5-10 Minutes', 
+          instructions: ['Jog at a conversational pace to warm up body temp.'],
+          weeks: createWeeks({},{},{},{}) 
+        }
+      ]
+    },
+    {
+      type: 'Strength',
+      title: 'Intervals (Reset)',
+      exercises: [
+        {
+            name: '400m Repeats',
+            notes: 'Rest 1:1 ratio. Maintain intensity.',
+            videoUrl: 'https://www.youtube.com/results?search_query=track+intervals+400m',
+            instructions: [
+              'Run 400m (1 lap of track) at a hard, sustainable pace.',
+              'Rest for the exact amount of time it took you to run the lap.',
+            ],
+            weeks: {
+                1: { sets: '4', reps: '400m' },
+                2: { sets: '5', reps: '400m' },
+                3: { sets: '6', reps: '400m' },
+                4: { sets: '6', reps: '400m' }
+            }
+        }
+      ]
+    }
+  ]
+};
+
+export const Conditioning_B_P2: DailyWorkoutPlan = {
+    id: 'p2_cond_b',
+    title: 'Phase 2: Conditioning B (Sprints)',
+    type: 'Run',
+    sections: [
+        { type: 'Warm Up', title: 'Dynamic Warm Up', exercises: [] },
+        { 
+            type: 'Circuit', 
+            title: 'Sprints (Reset)',
+            exercises: [
+                { 
+                  name: '25m Shuttle Run', 
+                  videoUrl: 'https://www.youtube.com/results?search_query=shuttle+run+drills',
+                  instructions: [
+                    'Mark a 25m distance.',
+                    'Sprint to the line, touch with foot/hand.',
+                    'Turn and sprint back.',
+                    'One rep = down and back (50m total).',
+                    '4 laps = 25m, back, 25m, back (100m total).'
+                  ],
+                  // Volume resets at Week 5 (Phase 2 Week 1)
                   weeks: createWeeks({sets: '6', reps: '4 laps'}, {sets: '8', reps: '4 laps'}, {sets: '10', reps: '4 laps'}, {sets: '10', reps: '4 laps'}) 
                 }
             ]
@@ -913,9 +983,9 @@ export const getWorkoutForDate = (startDate: Date, currentDate: Date): { workout
     if (!isPhase2) {
         switch (dayOfWeek) {
             case 0: workout = P1_D1_Strength; break;
-            case 1: workout = P1_Conditioning_A; break;
+            case 1: workout = Conditioning_A_P1; break;
             case 2: workout = P1_D2_Strength; break;
-            case 3: workout = P1_Conditioning_B; break;
+            case 3: workout = Conditioning_B_P1; break;
             case 4: workout = P1_D3_Strength; break;
             default: workout = Rest_Day; break;
         }
@@ -924,9 +994,9 @@ export const getWorkoutForDate = (startDate: Date, currentDate: Date): { workout
     else {
         switch (dayOfWeek) {
             case 0: workout = P2_D1_Strength; break;
-            case 1: workout = P1_Conditioning_A; break; // Use same running structure for now or duplicate if needed
+            case 1: workout = Conditioning_A_P2; break; 
             case 2: workout = P2_D2_Strength; break;
-            case 3: workout = P1_Conditioning_B; break;
+            case 3: workout = Conditioning_B_P2; break;
             case 4: workout = P2_D3_Strength; break;
             default: workout = Rest_Day; break;
         }

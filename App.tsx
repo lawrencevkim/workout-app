@@ -5,7 +5,8 @@ import {
   Calendar, CheckCircle, ChevronLeft, ChevronRight, Info, 
   Trophy, Dumbbell, Timer, LayoutDashboard, CalendarDays, 
   ChevronDown, ChevronUp, AlertCircle, Video, Settings,
-  List, Clock, XCircle, ArrowLeft, Check, Square, CheckSquare
+  List, Clock, XCircle, ArrowLeft, Check, Square, CheckSquare,
+  CalendarOff, ArrowRight, Play, Activity
 } from 'lucide-react';
 
 // --- Components ---
@@ -23,20 +24,22 @@ const Header = ({
     <div className="w-full max-w-3xl mx-auto flex justify-between items-center">
       <div className="flex items-center gap-2">
         {currentView === 'daily' ? (
-           <button onClick={() => setView('schedule')} className="mr-2 p-1 -ml-1 rounded hover:bg-slate-800">
+           <button onClick={() => setView('schedule')} className="mr-2 p-1 -ml-1 rounded hover:bg-slate-800 transition-colors">
              <ArrowLeft className="h-6 w-6 text-slate-300 hover:text-white" />
            </button>
         ) : (
-          <Dumbbell className="h-6 w-6 text-blue-400" />
+          <div className="bg-blue-500/20 p-1.5 rounded-lg border border-blue-500/30">
+            <Activity className="h-5 w-5 text-blue-400" />
+          </div>
         )}
-        <h1 className="text-xl font-bold tracking-tight hidden sm:block">{title}</h1>
-        <h1 className="text-xl font-bold tracking-tight sm:hidden">Tactical Fit</h1>
+        <h1 className="text-lg font-bold tracking-wider uppercase hidden sm:block font-mono">{title}</h1>
+        <h1 className="text-lg font-bold tracking-wider uppercase sm:hidden font-mono">Tactical<span className="text-blue-400">Fit</span></h1>
       </div>
-      <div className="flex bg-slate-800 rounded-lg p-1">
+      <div className="flex bg-slate-800 rounded-lg p-1 border border-slate-700">
         <button
           onClick={() => setView('schedule')}
-          className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-            currentView === 'schedule' ? 'bg-blue-600 text-white shadow' : 'text-slate-400 hover:text-white'
+          className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider transition-all ${
+            currentView === 'schedule' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'
           }`}
         >
           <List className="h-4 w-4" />
@@ -44,8 +47,8 @@ const Header = ({
         </button>
         <button
           onClick={() => setView('settings')}
-          className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-            currentView === 'settings' ? 'bg-blue-600 text-white shadow' : 'text-slate-400 hover:text-white'
+          className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider transition-all ${
+            currentView === 'settings' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'
           }`}
         >
           <Settings className="h-4 w-4" />
@@ -76,20 +79,20 @@ const DateSelector = ({
   };
 
   return (
-    <div className="bg-white p-4 shadow-sm border-b border-slate-200 flex items-center justify-between sticky top-[64px] z-20 h-[72px]">
-      <button onClick={handlePrev} className="p-2 hover:bg-slate-100 rounded-full">
-        <ChevronLeft className="h-6 w-6 text-slate-600" />
+    <div className="bg-white border-b border-slate-200 p-4 flex items-center justify-between sticky top-[64px] z-20 h-[72px] shadow-sm">
+      <button onClick={handlePrev} className="p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-500 hover:text-slate-900">
+        <ChevronLeft className="h-6 w-6" />
       </button>
       <div className="flex flex-col items-center">
-        <span className="text-sm font-medium text-slate-500 uppercase tracking-wider">
+        <span className="text-xs font-bold text-slate-500 uppercase tracking-widest font-mono">
           {currentDate.toLocaleDateString(undefined, { weekday: 'long' })}
         </span>
-        <span className="text-lg font-bold text-slate-900">
+        <span className="text-xl font-bold text-slate-900 tracking-tight">
           {currentDate.toLocaleDateString(undefined, { month: 'long', day: 'numeric' })}
         </span>
       </div>
-      <button onClick={handleNext} className="p-2 hover:bg-slate-100 rounded-full">
-        <ChevronRight className="h-6 w-6 text-slate-600" />
+      <button onClick={handleNext} className="p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-500 hover:text-slate-900">
+        <ChevronRight className="h-6 w-6" />
       </button>
     </div>
   );
@@ -107,11 +110,18 @@ const ExerciseCard: React.FC<{
   if (!prescription) return null;
 
   return (
-    <div className={`rounded-xl shadow-sm border overflow-hidden mb-4 transition-all duration-300 ${
-        isComplete ? 'bg-green-50 border-green-200' : 'bg-white border-slate-200'
-    }`}>
+    <div className={`
+      relative overflow-hidden rounded-lg border transition-all duration-300 mb-4 group
+      ${isComplete 
+        ? 'bg-slate-50 border-slate-200 opacity-70' 
+        : 'bg-white border-slate-200 shadow-sm hover:border-slate-300 hover:shadow-md'
+      }
+    `}>
+      {/* Status Bar Indicator */}
+      <div className={`absolute left-0 top-0 bottom-0 w-1.5 transition-colors duration-300 ${isComplete ? 'bg-emerald-500' : 'bg-blue-600'}`} />
+
       <div 
-        className="p-4 flex gap-4 cursor-pointer hover:bg-slate-50/50 transition-colors"
+        className="p-4 pl-6 flex gap-4 cursor-pointer"
         onClick={() => setIsOpen(!isOpen)}
       >
         {/* Checkbox Section */}
@@ -122,29 +132,41 @@ const ExerciseCard: React.FC<{
                     onToggle();
                 }}
                 className={`
-                    flex items-center justify-center h-8 w-8 rounded-lg border-2 transition-all duration-200
+                    flex items-center justify-center h-6 w-6 rounded border-2 transition-all duration-200
                     ${isComplete 
-                        ? 'bg-green-500 border-green-500 text-white shadow-sm' 
-                        : 'bg-white border-slate-300 text-slate-300 hover:border-blue-400'
+                        ? 'bg-emerald-500 border-emerald-500 text-white shadow-sm' 
+                        : 'bg-white border-slate-300 text-transparent hover:border-blue-500'
                     }
                 `}
                 aria-label={`Mark ${exercise.name} as complete`}
             >
-                {isComplete && <Check className="h-5 w-5" />}
+                <Check className="h-4 w-4 stroke-[3]" />
             </button>
         </div>
 
         {/* Info Section */}
         <div className="flex-1">
           <div className="flex items-start justify-between">
-              <h3 className={`font-bold text-lg leading-tight ${isComplete ? 'text-green-800' : 'text-slate-900'}`}>
+              <h3 className={`font-bold text-lg leading-tight transition-colors ${isComplete ? 'text-slate-500 line-through' : 'text-slate-900'}`}>
                   {exercise.name}
               </h3>
           </div>
-          <div className="flex gap-2 mt-2 text-sm text-slate-600 flex-wrap">
-             <span className="font-mono bg-slate-100 px-2 py-0.5 rounded text-slate-700 font-semibold border border-slate-200">{prescription.sets} Sets</span>
-             <span className="font-mono bg-slate-100 px-2 py-0.5 rounded text-slate-700 font-semibold border border-slate-200">{prescription.reps} Reps</span>
-             {prescription.intensity && <span className="font-medium text-blue-600 px-1 py-0.5">{prescription.intensity}</span>}
+          
+          {/* Tech Pills for Data */}
+          <div className="flex flex-wrap gap-2 mt-3">
+             <div className="flex items-center bg-slate-100 rounded border border-slate-200 px-2 py-1">
+                <span className="text-[10px] text-slate-500 uppercase font-mono mr-2">SETS</span>
+                <span className="text-xs font-mono font-bold text-slate-900">{prescription.sets}</span>
+             </div>
+             <div className="flex items-center bg-slate-100 rounded border border-slate-200 px-2 py-1">
+                <span className="text-[10px] text-slate-500 uppercase font-mono mr-2">REPS</span>
+                <span className="text-xs font-mono font-bold text-slate-900">{prescription.reps}</span>
+             </div>
+             {prescription.intensity && (
+                <div className="flex items-center bg-blue-50 rounded border border-blue-100 px-2 py-1">
+                   <span className="text-xs font-mono font-medium text-blue-700">{prescription.intensity}</span>
+                </div>
+             )}
           </div>
         </div>
 
@@ -154,22 +176,23 @@ const ExerciseCard: React.FC<{
         </div>
       </div>
       
-      {isOpen && (
-        <div className="px-4 pb-4 border-t border-slate-100 bg-slate-50/50 pt-4 pl-[60px]">
+      {/* Details Accordion */}
+      <div className={`transition-all duration-300 overflow-hidden bg-slate-50 ${isOpen ? 'max-h-[800px] border-t border-slate-100' : 'max-h-0'}`}>
+        <div className="p-4 pl-6 space-y-4">
           {exercise.notes && (
-            <div className="mb-4 text-sm bg-blue-50 text-blue-800 p-3 rounded-lg border border-blue-100 flex gap-2 items-start">
-              <Info className="h-4 w-4 mt-0.5 flex-shrink-0 text-blue-500" />
+            <div className="text-sm bg-blue-50 text-blue-800 p-3 rounded border border-blue-100 flex gap-2 items-start">
+              <Info className="h-4 w-4 mt-0.5 flex-shrink-0 text-blue-600" />
               <span>{exercise.notes}</span>
             </div>
           )}
           
           {exercise.instructions && (
-            <div className="mb-4">
-              <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Instructions</h4>
-              <div className="space-y-3 relative before:absolute before:left-3 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200">
+            <div>
+              <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 font-mono">Briefing</h4>
+              <div className="space-y-3 relative before:absolute before:left-3 before:top-2 before:bottom-2 before:w-px before:bg-slate-300">
                 {exercise.instructions.map((inst, idx) => (
                   <div key={idx} className="relative flex gap-3">
-                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-white border-2 border-slate-200 text-slate-500 flex items-center justify-center text-xs font-bold z-10">
+                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-white border border-slate-300 text-slate-500 flex items-center justify-center text-xs font-mono z-10 shadow-sm">
                       {idx + 1}
                     </div>
                     <p className="text-sm text-slate-700 leading-relaxed pt-0.5">{inst}</p>
@@ -180,14 +203,14 @@ const ExerciseCard: React.FC<{
           )}
 
           {exercise.commonMistakes && (
-            <div className="mt-4 bg-rose-50 rounded-lg p-4 border border-rose-100">
-               <h4 className="text-xs font-bold text-rose-700 uppercase tracking-wider mb-3 flex items-center gap-1.5">
-                 <AlertCircle className="h-4 w-4" /> Common Mistakes
+            <div className="bg-rose-50 rounded p-3 border border-rose-100">
+               <h4 className="text-[10px] font-bold text-rose-600 uppercase tracking-widest mb-2 flex items-center gap-1.5 font-mono">
+                 <AlertCircle className="h-3 w-3" /> Errors to Avoid
                </h4>
-               <ul className="space-y-2">
+               <ul className="space-y-1">
                 {exercise.commonMistakes.map((mistake, idx) => (
-                  <li key={idx} className="flex gap-2 text-sm text-rose-800">
-                    <XCircle className="h-4 w-4 flex-shrink-0 mt-0.5 text-rose-400" />
+                  <li key={idx} className="flex gap-2 text-xs text-rose-800">
+                    <span className="text-rose-400">•</span>
                     <span className="leading-relaxed">{mistake}</span>
                   </li>
                 ))}
@@ -196,20 +219,22 @@ const ExerciseCard: React.FC<{
           )}
 
           {exercise.videoUrl && (
-            <div className="mt-4 pt-3 border-t border-slate-200">
+            <div className="pt-2">
               <a 
                 href={exercise.videoUrl} 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="flex items-center justify-center w-full gap-2 p-2.5 text-sm font-bold text-slate-700 bg-white hover:bg-slate-50 hover:text-blue-600 rounded-lg transition-all border border-slate-200 shadow-sm"
+                className="group/btn flex items-center justify-center w-full gap-2 p-3 text-sm font-bold text-slate-600 bg-white hover:bg-slate-50 hover:text-blue-600 rounded transition-all border border-slate-200 shadow-sm"
               >
-                <Video className="h-4 w-4" />
-                Watch Demonstration
+                <div className="bg-slate-100 p-1 rounded-full group-hover/btn:bg-blue-100 group-hover/btn:text-blue-600 transition-colors">
+                    <Play className="h-3 w-3 fill-current" />
+                </div>
+                VIZUALIZE MOVEMENT
               </a>
             </div>
           )}
         </div>
-      )}
+      </div>
     </div>
   );
 };
@@ -218,21 +243,22 @@ const ProgressBar = ({ completed, total }: { completed: number, total: number })
     const percentage = total > 0 ? Math.min(100, Math.round((completed / total) * 100)) : 0;
     
     return (
-        <div className="sticky top-[136px] z-10 bg-slate-50/95 backdrop-blur-sm pb-4 pt-2 border-b border-slate-200/60 mb-6">
-             <div className="flex justify-between items-end mb-1.5 px-1">
+        <div className="sticky top-[136px] z-10 bg-slate-50/95 backdrop-blur-sm pb-4 pt-2 border-b border-slate-200 mb-6">
+             <div className="flex justify-between items-end mb-2 px-1">
                  <div>
-                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Session Progress</span>
+                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest font-mono">Mission Progress</span>
                  </div>
                  <div className="text-right">
-                    <span className="text-sm font-bold text-slate-900">{Math.round(percentage)}%</span>
-                    <span className="text-xs text-slate-500 ml-1">({completed}/{total} Exercises)</span>
+                    <span className="text-lg font-mono font-bold text-slate-900 leading-none">{Math.round(percentage)}%</span>
+                    <span className="text-xs text-slate-500 ml-2 font-mono">[{completed}/{total}]</span>
                  </div>
              </div>
-             <div className="h-2.5 bg-slate-200 rounded-full overflow-hidden">
+             <div className="h-2.5 bg-slate-200 rounded-full overflow-hidden border border-slate-300/50">
                  <div 
-                    className="h-full bg-green-500 shadow-sm transition-all duration-500 ease-out"
+                    className={`h-full transition-all duration-500 ease-out relative overflow-hidden ${percentage === 100 ? 'bg-emerald-500' : 'bg-blue-600'}`}
                     style={{ width: `${percentage}%` }}
-                 />
+                 >
+                 </div>
              </div>
         </div>
     )
@@ -271,17 +297,19 @@ const WorkoutView = ({
 
   if (workout.type === 'Rest') {
     return (
-      <div className="flex flex-col items-center justify-center h-[60vh] text-slate-400 p-8 text-center">
-        <div className="bg-slate-100 p-6 rounded-full mb-4">
-          <Clock className="h-12 w-12 text-slate-400" />
+      <div className="flex flex-col items-center justify-center h-[60vh] text-slate-500 p-8 text-center">
+        <div className="bg-slate-100 p-8 rounded-full mb-6 border border-slate-200 relative">
+          <Clock className="h-16 w-16 text-slate-400" />
         </div>
-        <h2 className="text-2xl font-bold text-slate-700 mb-2">Rest Day</h2>
-        <p className="max-w-xs">Take it easy today. Active recovery or complete rest.</p>
+        <h2 className="text-3xl font-bold text-slate-800 mb-2 tracking-tight">REST DAY</h2>
+        <p className="max-w-xs text-slate-500">Recovery is a tactical necessity. Hydrate and mobilize.</p>
+        
         {workout.sections.map((section, idx) => (
-            <div key={idx} className="mt-8 text-left w-full max-w-sm bg-white p-4 rounded-lg shadow-sm">
-                <h3 className="font-bold text-slate-800 mb-2">{section.title}</h3>
+            <div key={idx} className="mt-12 text-left w-full max-w-sm bg-white p-6 rounded-lg border border-slate-200 shadow-sm">
+                <h3 className="font-bold text-slate-800 mb-4 uppercase tracking-wider text-sm border-b border-slate-100 pb-2">{section.title}</h3>
                 {section.exercises.map((ex, i) => (
-                    <div key={i} className="text-slate-600 text-sm py-1 border-b border-slate-100 last:border-0">
+                    <div key={i} className="text-slate-600 text-sm py-2 flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-slate-300" />
                         {ex.name}
                     </div>
                 ))}
@@ -293,13 +321,18 @@ const WorkoutView = ({
 
   return (
     <div className="max-w-3xl mx-auto p-4 pb-20">
-      <div className="mb-4">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-sm font-bold mb-2">
-            <span>Week {week}</span>
-            <span className="w-1 h-1 bg-blue-400 rounded-full"></span>
-            <span>{workout.type}</span>
-        </div>
-        <h2 className="text-2xl font-bold text-slate-900">{workout.title}</h2>
+      {/* Hero Header */}
+      <div className="mb-6 relative overflow-hidden rounded-xl bg-white border border-slate-200 p-6 shadow-sm">
+         <div className="absolute top-0 right-0 p-4 opacity-5">
+            <Activity className="h-32 w-32 text-blue-600" />
+         </div>
+         <div className="relative z-10">
+            <div className="flex items-center gap-2 mb-2">
+                <span className="bg-blue-50 text-blue-700 border border-blue-100 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">Week {week}</span>
+                <span className="bg-slate-100 text-slate-600 border border-slate-200 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">{workout.type}</span>
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 uppercase tracking-tight">{workout.title}</h2>
+         </div>
       </div>
 
       <ProgressBar completed={completedExercises} total={totalExercises} />
@@ -307,12 +340,12 @@ const WorkoutView = ({
       <div className="space-y-8">
         {workout.sections.map((section, idx) => (
           <div key={idx}>
-            <div className="flex items-center gap-2 mb-4">
-               {section.type === 'Warm Up' && <Timer className="h-5 w-5 text-orange-500" />}
-               {section.type === 'Strength' && <Dumbbell className="h-5 w-5 text-blue-500" />}
-               {section.type === 'Superset' && <List className="h-5 w-5 text-purple-500" />}
-               {section.type === 'Circuit' && <Timer className="h-5 w-5 text-red-500" />}
-               <h3 className="text-lg font-bold text-slate-800">{section.title || section.type}</h3>
+            <div className="flex items-center gap-2 mb-4 px-1">
+               {section.type === 'Warm Up' && <Timer className="h-4 w-4 text-orange-500" />}
+               {section.type === 'Strength' && <Dumbbell className="h-4 w-4 text-blue-500" />}
+               {section.type === 'Superset' && <List className="h-4 w-4 text-purple-500" />}
+               {section.type === 'Circuit' && <Timer className="h-4 w-4 text-red-500" />}
+               <h3 className="text-sm font-bold text-slate-500 uppercase tracking-widest">{section.title || section.type}</h3>
             </div>
             
             <div>
@@ -344,12 +377,20 @@ const SettingsView = ({
 }) => {
   const [tempDate, setTempDate] = useState(startDate.toISOString().split('T')[0]);
 
+  useEffect(() => {
+    setTempDate(startDate.toISOString().split('T')[0]);
+  }, [startDate]);
+
   const handleSave = () => {
-    // Parse the local date string to avoid UTC shifting
     const [year, month, day] = tempDate.split('-').map(Number);
-    // Create date at local midnight
     setStartDate(new Date(year, month - 1, day));
     onClose();
+  };
+
+  const handleShiftSchedule = (days: number) => {
+    const newDate = new Date(startDate);
+    newDate.setDate(newDate.getDate() + days);
+    setStartDate(newDate);
   };
 
   const handleResetProgress = () => {
@@ -360,34 +401,69 @@ const SettingsView = ({
   }
 
   return (
-    <div className="p-4 max-w-lg mx-auto">
-      <h2 className="text-2xl font-bold text-slate-900 mb-6">Settings</h2>
+    <div className="p-4 max-w-lg mx-auto pb-20">
+      <h2 className="text-2xl font-bold text-slate-900 mb-6 uppercase tracking-wider">Settings</h2>
       
-      <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 mb-6">
-        <label className="block text-sm font-medium text-slate-700 mb-2">Program Start Date</label>
-        <p className="text-sm text-slate-500 mb-4">Select the Monday when you started Phase 1.</p>
+      {/* Schedule Shifting Section */}
+      <div className="bg-white p-6 rounded-xl border border-slate-200 mb-6 shadow-sm">
+          <div className="flex items-center gap-2 mb-3">
+              <CalendarOff className="h-5 w-5 text-orange-500" />
+              <h3 className="font-bold text-slate-900">Missed a Day?</h3>
+          </div>
+          <p className="text-sm text-slate-500 mb-6 leading-relaxed border-b border-slate-100 pb-4">
+              Shift your schedule to realign with your training reality.
+          </p>
+          
+          <div className="grid grid-cols-2 gap-3">
+              <button 
+                  onClick={() => handleShiftSchedule(1)}
+                  className="group flex flex-col items-center justify-center p-3 rounded bg-slate-50 border border-slate-200 hover:border-slate-300 hover:bg-slate-100 transition-all text-center"
+              >
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Push Schedule</span>
+                  <div className="flex items-center gap-2 text-slate-800 font-bold">
+                      <span>+1 Day</span>
+                      <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                  </div>
+              </button>
+
+              <button 
+                  onClick={() => handleShiftSchedule(-1)}
+                  className="group flex flex-col items-center justify-center p-3 rounded bg-slate-50 border border-slate-200 hover:border-slate-300 hover:bg-slate-100 transition-all text-center"
+              >
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Pull Schedule</span>
+                  <div className="flex items-center gap-2 text-slate-800 font-bold">
+                      <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
+                      <span>-1 Day</span>
+                  </div>
+              </button>
+          </div>
+      </div>
+
+      <div className="bg-white p-6 rounded-xl border border-slate-200 mb-6 shadow-sm">
+        <label className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wide">Program Start Date</label>
+        <p className="text-xs text-slate-500 mb-4">Select the Monday when you started Phase 1.</p>
         <input 
           type="date" 
           value={tempDate}
           onChange={(e) => setTempDate(e.target.value)}
-          className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="w-full p-3 bg-white border border-slate-300 text-slate-900 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
         />
         
-        <div className="mt-8 flex gap-3">
+        <div className="mt-6 flex gap-3">
           <button 
             onClick={handleSave}
-            className="flex-1 bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition-colors"
+            className="flex-1 bg-blue-600 text-white font-bold py-3 rounded hover:bg-blue-700 transition-colors uppercase tracking-wider text-sm shadow-sm"
           >
-            Save Changes
+            Update Date
           </button>
         </div>
       </div>
 
-      <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-          <h3 className="font-bold text-slate-900 mb-2">Data Management</h3>
+      <div className="bg-white p-6 rounded-xl border border-rose-100 shadow-sm">
+          <h3 className="font-bold text-rose-600 mb-4 uppercase tracking-wider text-sm">Danger Zone</h3>
           <button 
             onClick={handleResetProgress}
-            className="w-full py-3 border border-rose-200 text-rose-600 rounded-lg font-bold hover:bg-rose-50 transition-colors"
+            className="w-full py-3 border border-rose-200 text-rose-600 rounded bg-rose-50 hover:bg-rose-100 font-bold transition-colors text-sm uppercase"
           >
               Reset All Progress
           </button>
@@ -418,7 +494,7 @@ const ScheduleView = ({
 
     return (
         <div className="p-4 max-w-3xl mx-auto pb-20">
-             <h2 className="text-2xl font-bold text-slate-900 mb-4">Program Schedule (8 Weeks)</h2>
+             <h2 className="text-2xl font-bold text-slate-900 mb-6 uppercase tracking-wider">Mission Timeline</h2>
              
              {weeks.map(weekNum => {
                  const weekStart = new Date(startDate);
@@ -454,28 +530,28 @@ const ScheduleView = ({
                  const percentage = totalExercises > 0 ? Math.round((completedExercises / totalExercises) * 100) : 0;
                  
                  return (
-                     <div key={weekNum} className={`mb-6 rounded-xl border ${isCurrentWeek ? 'border-blue-200 bg-blue-50/50' : 'border-slate-200 bg-white'} overflow-hidden`}>
-                         <div className={`px-4 py-3 border-b border-slate-100 ${isPhase2 ? 'bg-slate-100' : 'bg-slate-50'}`}>
+                     <div key={weekNum} className={`mb-6 rounded-lg border ${isCurrentWeek ? 'border-blue-200 bg-white shadow-md ring-1 ring-blue-100' : 'border-slate-200 bg-white shadow-sm'} overflow-hidden`}>
+                         <div className={`px-4 py-3 border-b border-slate-100 ${isPhase2 ? 'bg-slate-50' : 'bg-white'}`}>
                              <div className="flex justify-between items-center mb-3">
                                 <div className="flex items-center gap-2">
-                                    <span className="font-bold text-slate-700">Week {weekNum}</span>
-                                    {isPhase2 && <span className="text-xs bg-slate-200 text-slate-600 px-2 py-0.5 rounded-full font-medium">Phase 2</span>}
-                                    {!isPhase2 && <span className="text-xs bg-slate-200 text-slate-600 px-2 py-0.5 rounded-full font-medium">Phase 1</span>}
+                                    <span className={`font-bold uppercase tracking-wider ${isCurrentWeek ? 'text-blue-600' : 'text-slate-600'}`}>Week {weekNum}</span>
+                                    {isPhase2 && <span className="text-[10px] bg-purple-50 text-purple-700 border border-purple-100 px-2 py-0.5 rounded font-mono font-bold">PHASE 2</span>}
+                                    {!isPhase2 && <span className="text-[10px] bg-slate-100 text-slate-500 border border-slate-200 px-2 py-0.5 rounded font-mono font-bold">PHASE 1</span>}
                                 </div>
-                                <span className="text-xs text-slate-500">
+                                <span className="text-[10px] text-slate-400 font-mono">
                                     {weekStart.toLocaleDateString(undefined, {month:'short', day:'numeric'})} - {new Date(weekStart.getTime() + 6*msPerDay).toLocaleDateString(undefined, {month:'short', day:'numeric'})}
                                 </span>
                              </div>
 
                              {/* Weekly Progress Bar */}
                              <div className="flex items-center gap-2">
-                                <div className="flex-1 h-2 bg-slate-200 rounded-full overflow-hidden border border-slate-300/50">
+                                <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
                                     <div 
-                                        className={`h-full rounded-full transition-all duration-500 ease-out ${percentage === 100 ? 'bg-green-500' : 'bg-blue-500'}`} 
+                                        className={`h-full rounded-full transition-all duration-500 ease-out ${percentage === 100 ? 'bg-emerald-500' : 'bg-blue-500'}`} 
                                         style={{ width: `${percentage}%` }}
                                     />
                                 </div>
-                                <span className="text-xs font-bold text-slate-500 w-8 text-right">{percentage}%</span>
+                                <span className="text-[10px] font-mono text-slate-400 w-8 text-right">{percentage}%</span>
                              </div>
                          </div>
                          <div className="divide-y divide-slate-100">
@@ -509,30 +585,28 @@ const ScheduleView = ({
                                      <div 
                                         key={idx} 
                                         onClick={() => onSelectDate(dayDate)}
-                                        className={`p-3 flex items-center gap-3 hover:bg-slate-50 cursor-pointer ${isToday ? 'bg-blue-50' : ''}`}
+                                        className={`p-3 flex items-center gap-3 hover:bg-slate-50 cursor-pointer transition-colors ${isToday ? 'bg-blue-50' : ''}`}
                                      >
                                          <div className="w-12 text-center flex-shrink-0">
-                                             <div className="text-xs font-bold text-slate-400 mb-0.5">{dayName}</div>
+                                             <div className="text-[10px] font-bold text-slate-400 uppercase mb-0.5">{dayName}</div>
                                              <div className={`text-sm font-bold leading-none ${isToday ? 'text-blue-600' : 'text-slate-700'}`}>{dayDate.getDate()}</div>
-                                             <div className="text-[10px] font-medium text-slate-400 mt-0.5">{dayDate.toLocaleDateString(undefined, {month:'short'})}</div>
                                          </div>
                                          <div className="flex-1 min-w-0">
                                              <div className="flex justify-between items-start">
-                                                <div className="font-medium text-slate-900 text-sm truncate pr-2">{workout.title}</div>
-                                                {isDone && <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />}
+                                                <div className={`font-medium text-sm truncate pr-2 ${isDone ? 'text-slate-400 line-through' : 'text-slate-800'}`}>{workout.title}</div>
+                                                {isDone && <CheckCircle className="h-4 w-4 text-emerald-500 flex-shrink-0" />}
                                              </div>
-                                             <div className="text-xs text-slate-500 mb-1.5">{workout.type}</div>
+                                             <div className="text-[10px] text-slate-500 mb-1.5 uppercase tracking-wide">{workout.type}</div>
                                              
                                              {/* Daily Progress Bar */}
                                              {dailyTotal > 0 && (
                                                 <div className="flex items-center gap-2">
-                                                    <div className="h-1.5 w-24 bg-slate-200 rounded-full overflow-hidden">
+                                                    <div className="h-1 w-16 bg-slate-200 rounded-full overflow-hidden">
                                                         <div 
-                                                            className={`h-full rounded-full transition-all ${dailyPct === 100 ? 'bg-green-500' : 'bg-blue-400'}`}
+                                                            className={`h-full rounded-full transition-all ${dailyPct === 100 ? 'bg-emerald-500' : 'bg-blue-400'}`}
                                                             style={{ width: `${dailyPct}%` }}
                                                         />
                                                     </div>
-                                                    <span className="text-[10px] text-slate-400 font-medium">{dailyPct}%</span>
                                                 </div>
                                              )}
                                          </div>
@@ -555,22 +629,16 @@ const App = () => {
       const stored = localStorage.getItem('tp_start_date');
       if (stored) return new Date(stored);
       
-      // Default to Jan 19, 2026
-      return new Date(2026, 0, 19);
+      // Default to Jan 21, 2026
+      return new Date(2026, 0, 21);
   });
 
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
 
-  // Store structure: { "YYYY-MM-DD": { "Exercise Name": true } }
-  // Changed from boolean[] to boolean for single checkbox tracking
   const [progress, setProgress] = useState<Record<string, Record<string, boolean>>>(() => {
       const saved = localStorage.getItem('tp_workout_progress');
       if (!saved) return {};
       try {
-          // Add safe parse or migration if needed, for now just simple parse
-          // If old data exists (arrays), this might behave unexpectedly if not cleared,
-          // but React is robust enough to not crash usually.
-          // Ideally, we could check the shape here.
           return JSON.parse(saved);
       } catch (e) {
           return {};
@@ -591,7 +659,7 @@ const App = () => {
       
       setProgress(prev => {
           const dayProgress = prev[dateStr] || {};
-          const isComplete = !!dayProgress[exerciseName]; // Force boolean
+          const isComplete = !!dayProgress[exerciseName]; 
 
           const newProgress = {
               ...prev,
@@ -609,7 +677,7 @@ const App = () => {
   const dateStr = selectedDate.toISOString().split('T')[0];
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
+    <div className="min-h-screen bg-slate-50 font-sans text-slate-900 selection:bg-blue-100 selection:text-blue-900">
       <Header title="Tactical Performance" currentView={view} setView={setView} />
       
       {view === 'daily' && (
